@@ -134,14 +134,19 @@ BLYNK_WRITE(V1)
 
     Serial.println("[FEEDER_MANAGER] : Feed Time Input Received SUCCESS!");
     WebSerial.println("[FEEDER_MANAGER] : Feed Time Input Received SUCCESS!");
+    Blynk.virtualWrite(V2, "[FEEDER_MANAGER] : Feed Time Input Received SUCCESS!");
     Serial.print("[FEEDER_MANAGER] : Start Time: ");
     Serial.println(startTimeStr);
     WebSerial.print("[FEEDER_MANAGER] : Start Time: ");
     WebSerial.println(startTimeStr);
+    Blynk.virtualWrite(V2, "[FEEDER_MANAGER] : Start Time: ");
+    Blynk.virtualWrite(V2, startTimeStr);
     Serial.print("[FEEDER_MANAGER] : End Time: ");
     Serial.println(endTimeStr);
     WebSerial.print("[FEEDER_MANAGER] : End Time: ");
     WebSerial.println(endTimeStr);
+    Blynk.virtualWrite(V2, "[FEEDER_MANAGER] : End Time: ");
+    Blynk.virtualWrite(V2, endTimeStr);
 }
 
 /**
@@ -217,15 +222,15 @@ void LEDControlTask(void *pvParameters)
 
         if (pinState == 1)
         {
-            //Serial.print("[FEEDER_MANAGER] : Motor STARTED! : ");
-            //Serial.println(startTimeStr);
+            // Serial.print("[FEEDER_MANAGER] : Motor STARTED! : ");
+            // Serial.println(startTimeStr);
             WebSerial.print("[FEEDER_MANAGER] : Motor STARTED! : ");
             WebSerial.println(startTimeStr);
         }
         else if (pinState == 0)
         {
-            //Serial.print("[FEEDER_MANAGER] : Motor STOPPED! : ");
-            //Serial.println(endTimeStr);
+            // Serial.print("[FEEDER_MANAGER] : Motor STOPPED! : ");
+            // Serial.println(endTimeStr);
             WebSerial.print("[FEEDER_MANAGER] : Motor STOPPED! : ");
             WebSerial.println(endTimeStr);
         }
