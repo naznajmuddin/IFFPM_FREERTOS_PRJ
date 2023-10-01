@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "blackpill_f411ce_defconfig": "dts",
+        "*.dtsi": "dts",
+        "functional": "cpp"
+    }
+}
