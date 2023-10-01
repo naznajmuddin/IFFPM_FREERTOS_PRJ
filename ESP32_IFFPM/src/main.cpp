@@ -6,15 +6,42 @@
  * @author Nazwa Najmuddin <naznajmuddin@gmail.com>
  */
 
+#define BLYNK_TEMPLATE_ID "TMPL6AoOuAMW-"
+#define BLYNK_TEMPLATE_NAME "LED"
+#define BLYNK_AUTH_TOKEN "luf0lg1l9uZifSeHyjM-WQUcg0nYs_bx"
+
 #include <Arduino.h>
+#include <WiFi.h>
+#include <WiFiClient.h>
+#include <BlynkSimpleEsp32.h>
+#include <WiFiUdp.h>
+#include <NTPClient.h>
 #include "driver/gpio.h"
 #include "sdkconfig.h"
 
 #define BLINK_GPIO GPIO_NUM_2
+#define LEDPIN GPIO_NUM_13
 
+/** Structs **/
 TaskHandle_t myThreadIndicator1 = NULL;
+TaskHandle_t myLEDControlTask = NULL; // Task for LED control
 
+WiFiUDP ntpUDP;
+const long int utcOffsetInSeconds = 28800L;
+NTPClient timeClient(ntpUDP, "asia.pool.ntp.org", utcOffsetInSeconds);
+
+int startTime;
+int endTime;
+int previousPinState = -1;
+
+/** WIFI Manager **/
+const char *ssid = "Solaria19092.4";
+const char *pass = "";
+
+/** Functions **/
 void thread_indicator1(void *pvParameters);
+void project_init();
+void LEDControlTask(void *pvParameters); // Declaration of LED control task
 
 /**
  * @brief Initialising tasks, connecting to Blynk server
@@ -23,6 +50,33 @@ void thread_indicator1(void *pvParameters);
 void setup()
 {
     Serial.begin(115200);
+    delay(100);
+    WiFi.begin(ssid);
+    Serial.println("\n\x1b[31m[WIFI_MANAGER] : Connecting\x1b[0m");
+
+    while (WiFi.status() != WL_CONNECTED)
+    {
+        Serial.print(".");
+        delay(100);
+    }
+
+    Serial.println("\n\x1b[31m[WIFI_MANAGER] : Connected to the WiFi network\x1b[0m");
+    Serial.print("\n\x1b[31m[WIFI_MANAGER] : Local ESP32 IP: \x1b[0m");
+    Serial.println(WiFi.localIP());
+
+    Blynk.begin(BLYNK_AUTH_TOKEN, ssid, pass);
+    timeClient.begin();
+
+    project_init();
+
+    if (Blynk.connected())
+    {
+        Serial.println("\x1b[32m[BLYNK_MANAGER] : Connected to Blynk Server\x1b[0m");
+    }
+
+    pinMode(LEDPIN, OUTPUT);
+    // Blynk.virtualWrite(V0, LOW);
+    // Blynk.syncVirtual(V0);
 
     /**
      * @brief Creating tasks to run simultaneously according to priority
@@ -35,6 +89,41 @@ void setup()
      *                          TaskHandle_t * const pxCreatedTask) PRIVILEGED_FUNCTION
      */
     xTaskCreate(thread_indicator1, "Blinking LED", 4096, NULL, 1, &myThreadIndicator1);
+
+    // Create the LED control task
+    xTaskCreate(LEDControlTask, "LED Control", 4096, NULL, 2, &myLEDControlTask);
+}
+
+void project_init()
+{
+    Serial.println("\x1b[31m[JEBAT] : Initialising SPECTRE FIRMWARE...\x1b[0m");
+    Serial.println("\x1b[32m[PROJECT_NAME] : UMPSA IDP SPECTRE FIRMWARE\x1b[0m");
+    Serial.println("\x1b[32m[MCU_MAKER] : Espressif\x1b[0m");
+    Serial.println("\x1b[32m[MCU_PARTNUMBER] : ESP32\x1b[0m");
+}
+
+BLYNK_WRITE(V1)
+{
+    startTime = param[0].asInt();
+    endTime = param[1].asInt();
+
+    if (startTime == 0 && endTime == 0)
+    {
+        startTime = 999999;
+        endTime = 999999;
+    }
+
+    char startTimeStr[10];
+    sprintf(startTimeStr, "%02d:%02d %s", (startTime / 3600) % 12, (startTime / 60) % 60, (startTime >= 43200) ? "PM" : "AM");
+
+    char endTimeStr[10];
+    sprintf(endTimeStr, "%02d:%02d %s", (endTime / 3600) % 12, (endTime / 60) % 60, (endTime >= 43200) ? "PM" : "AM");
+
+    Serial.println("[FEEDER_MANAGER] : Feed Time Input Received SUCCESS!");
+    Serial.print("[FEEDER_MANAGER] : Start Time: ");
+    Serial.println(startTimeStr);
+    Serial.print("[FEEDER_MANAGER] : End Time: ");
+    Serial.println(endTimeStr);
 }
 
 /**
@@ -43,6 +132,8 @@ void setup()
  */
 void thread_indicator1(void *pvParameters)
 {
+    Serial.println("\x1b[33m[THREAD_INDICATOR] : Thread Started and RUNNING\x1b[0m");
+
     gpio_pad_select_gpio(BLINK_GPIO);
     gpio_set_direction(BLINK_GPIO, GPIO_MODE_OUTPUT);
     for (;;)
@@ -54,7 +145,58 @@ void thread_indicator1(void *pvParameters)
     }
 }
 
+// LED Control Task
+void LEDControlTask(void *pvParameters)
+{
+    for (;;)
+    {
+        timeClient.update();
+        int HH = timeClient.getHours();
+        int MM = timeClient.getMinutes();
+        int SS = timeClient.getSeconds();
+        int serverTime = 3600 * HH + 60 * MM + SS;
+        int pinState = digitalRead(LEDPIN);
+
+        char startTimeStr[10];
+        sprintf(startTimeStr, "%02d:%02d %s", (startTime / 3600) % 12, (startTime / 60) % 60, (startTime >= 43200) ? "PM" : "AM");
+
+        char endTimeStr[10];
+        sprintf(endTimeStr, "%02d:%02d %s", (endTime / 3600) % 12, (endTime / 60) % 60, (endTime >= 43200) ? "PM" : "AM");
+
+        if (startTime <= serverTime && serverTime <= endTime)
+        {
+            digitalWrite(LEDPIN, 1); // Turn on LED
+            // Serial.println("[FEEDER_MANAGER] : Motor STARTED!");
+        }
+        else if (startTime != serverTime && serverTime != endTime)
+        {
+            digitalWrite(LEDPIN, 0); // Turn off LED
+                                     // Serial.println("[FEEDER_MANAGER] : Motor STOPPED!");
+        }
+
+        if (pinState != previousPinState)
+        {
+            // Print the message when the state changes
+            if (pinState == 1)
+            {
+                Serial.print("[FEEDER_MANAGER] : Motor STARTED! : ");
+                Serial.println(startTimeStr);
+            }
+            else if (pinState == 0)
+            {
+                Serial.print("[FEEDER_MANAGER] : Motor STOPPED! : ");
+                Serial.println(endTimeStr);
+            }
+
+            // Update the previous pin state
+            previousPinState = pinState;
+        }
+
+        vTaskDelay(1000 / portTICK_PERIOD_MS); // Delay for 1 second
+    }
+}
+
 void loop()
 {
-    
+    Blynk.run();
 }
