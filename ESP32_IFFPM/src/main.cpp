@@ -16,8 +16,13 @@
 #include <BlynkSimpleEsp32.h>
 #include <WiFiUdp.h>
 #include <NTPClient.h>
+#include <AsyncTCP.h>
+#include <ESPAsyncWebServer.h>
+#include <WebSerial.h>
 #include "driver/gpio.h"
 #include "sdkconfig.h"
+
+AsyncWebServer server(80);
 
 #define BLINK_GPIO GPIO_NUM_2
 #define LEDPIN GPIO_NUM_13
@@ -27,7 +32,7 @@ TaskHandle_t myThreadIndicator1 = NULL;
 TaskHandle_t myLEDControlTask = NULL; // Task for LED control
 
 WiFiUDP ntpUDP;
-const long int utcOffsetInSeconds = 28800L;
+const long int utcOffsetInSeconds = 28800L; // UTC+8 Malaysia
 NTPClient timeClient(ntpUDP, "asia.pool.ntp.org", utcOffsetInSeconds);
 
 int startTime;
@@ -64,6 +69,9 @@ void setup()
     Serial.print("\n\x1b[31m[WIFI_MANAGER] : Local ESP32 IP: \x1b[0m");
     Serial.println(WiFi.localIP());
 
+    WebSerial.begin(&server);
+    server.begin();
+
     Blynk.begin(BLYNK_AUTH_TOKEN, ssid, pass);
     timeClient.begin();
 
@@ -72,6 +80,7 @@ void setup()
     if (Blynk.connected())
     {
         Serial.println("\x1b[32m[BLYNK_MANAGER] : Connected to Blynk Server\x1b[0m");
+        WebSerial.println("[BLYNK_MANAGER] : Connected to Blynk Server");
     }
 
     pinMode(LEDPIN, OUTPUT);
@@ -97,9 +106,13 @@ void setup()
 void project_init()
 {
     Serial.println("\x1b[31m[JEBAT] : Initialising SPECTRE FIRMWARE...\x1b[0m");
+    WebSerial.println("[JEBAT] : Initialising SPECTRE FIRMWARE...");
     Serial.println("\x1b[32m[PROJECT_NAME] : UMPSA IDP SPECTRE FIRMWARE\x1b[0m");
+    WebSerial.println("[PROJECT_NAME] : UMPSA IDP SPECTRE FIRMWARE");
     Serial.println("\x1b[32m[MCU_MAKER] : Espressif\x1b[0m");
+    WebSerial.println("[MCU_MAKER] : Espressif");
     Serial.println("\x1b[32m[MCU_PARTNUMBER] : ESP32\x1b[0m");
+    WebSerial.println("[MCU_PARTNUMBER] : ESP32");
 }
 
 BLYNK_WRITE(V1)
@@ -120,10 +133,15 @@ BLYNK_WRITE(V1)
     sprintf(endTimeStr, "%02d:%02d %s", (endTime / 3600) % 12, (endTime / 60) % 60, (endTime >= 43200) ? "PM" : "AM");
 
     Serial.println("[FEEDER_MANAGER] : Feed Time Input Received SUCCESS!");
+    WebSerial.println("[FEEDER_MANAGER] : Feed Time Input Received SUCCESS!");
     Serial.print("[FEEDER_MANAGER] : Start Time: ");
     Serial.println(startTimeStr);
+    WebSerial.print("[FEEDER_MANAGER] : Start Time: ");
+    WebSerial.println(startTimeStr);
     Serial.print("[FEEDER_MANAGER] : End Time: ");
     Serial.println(endTimeStr);
+    WebSerial.print("[FEEDER_MANAGER] : End Time: ");
+    WebSerial.println(endTimeStr);
 }
 
 /**
@@ -133,6 +151,7 @@ BLYNK_WRITE(V1)
 void thread_indicator1(void *pvParameters)
 {
     Serial.println("\x1b[33m[THREAD_INDICATOR] : Thread Started and RUNNING\x1b[0m");
+    WebSerial.println("[THREAD_INDICATOR] : Thread Started and RUNNING");
 
     gpio_pad_select_gpio(BLINK_GPIO);
     gpio_set_direction(BLINK_GPIO, GPIO_MODE_OUTPUT);
@@ -181,15 +200,34 @@ void LEDControlTask(void *pvParameters)
             {
                 Serial.print("[FEEDER_MANAGER] : Motor STARTED! : ");
                 Serial.println(startTimeStr);
+                WebSerial.print("[FEEDER_MANAGER] : Motor STARTED! : ");
+                WebSerial.println(startTimeStr);
             }
             else if (pinState == 0)
             {
                 Serial.print("[FEEDER_MANAGER] : Motor STOPPED! : ");
                 Serial.println(endTimeStr);
+                WebSerial.print("[FEEDER_MANAGER] : Motor STOPPED! : ");
+                WebSerial.println(endTimeStr);
             }
 
             // Update the previous pin state
             previousPinState = pinState;
+        }
+
+        if (pinState == 1)
+        {
+            //Serial.print("[FEEDER_MANAGER] : Motor STARTED! : ");
+            //Serial.println(startTimeStr);
+            WebSerial.print("[FEEDER_MANAGER] : Motor STARTED! : ");
+            WebSerial.println(startTimeStr);
+        }
+        else if (pinState == 0)
+        {
+            //Serial.print("[FEEDER_MANAGER] : Motor STOPPED! : ");
+            //Serial.println(endTimeStr);
+            WebSerial.print("[FEEDER_MANAGER] : Motor STOPPED! : ");
+            WebSerial.println(endTimeStr);
         }
 
         vTaskDelay(1000 / portTICK_PERIOD_MS); // Delay for 1 second
