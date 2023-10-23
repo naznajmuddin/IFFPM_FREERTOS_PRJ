@@ -10,6 +10,9 @@
 #define BLYNK_TEMPLATE_NAME "LED"
 #define BLYNK_AUTH_TOKEN "luf0lg1l9uZifSeHyjM-WQUcg0nYs_bx"
 
+#define SPEED_MAX 255
+#define SPEED_MIN 0
+
 #include <Arduino.h>
 #include <WiFi.h>
 #include <WiFiClient.h>
@@ -21,6 +24,7 @@
 #include <WebSerial.h>
 #include "driver/gpio.h"
 #include "sdkconfig.h"
+#include "mdd10a.h"
 
 AsyncWebServer server(80);
 
@@ -169,9 +173,17 @@ void thread_indicator1(void *pvParameters)
     }
 }
 
-// LED Control Task
+/**
+ * @brief Controlling components through time input
+ */
 void LEDControlTask(void *pvParameters)
 {
+    motor grinder;
+    motor crusher;
+
+    grinder.init_data(25, 25, 0);
+    crusher.init_data(22, 23, 1);
+
     for (;;)
     {
         timeClient.update();
@@ -191,11 +203,17 @@ void LEDControlTask(void *pvParameters)
         {
             digitalWrite(LEDPIN, 1); // Turn on LED
             // Serial.println("[FEEDER_MANAGER] : Motor STARTED!");
+            grinder.set_direction(LOW);
+            grinder.set_spin(SPEED_MAX);
+            crusher.set_direction(LOW);
+            crusher.set_spin(SPEED_MAX);
         }
         else if (startTime != serverTime && serverTime != endTime)
         {
             digitalWrite(LEDPIN, 0); // Turn off LED
-                                     // Serial.println("[FEEDER_MANAGER] : Motor STOPPED!");
+            // Serial.println("[FEEDER_MANAGER] : Motor STOPPED!");
+            grinder.set_spin(SPEED_MIN);
+            crusher.set_spin(SPEED_MIN);
         }
 
         if (pinState != previousPinState)
