@@ -44,8 +44,8 @@ int endTime;
 int previousPinState = -1;
 
 /** WIFI Manager **/
-const char *ssid = "kediamantunasbudi@unifi";
-const char *pass = "ktb123456";
+const char *ssid = "nazwa";
+const char *pass = "nazwa3499";
 
 /** Functions **/
 void thread_indicator1(void *pvParameters);
@@ -182,7 +182,7 @@ void LEDControlTask(void *pvParameters)
     motor grinder;
     motor crusher;
 
-    grinder.init_data(25, 25, 0);
+    grinder.init_data(25, 26, 0);
     crusher.init_data(22, 23, 1);
 
     for (;;)
