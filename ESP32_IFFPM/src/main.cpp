@@ -29,7 +29,7 @@
 AsyncWebServer server(80);
 
 #define BLINK_GPIO GPIO_NUM_2
-#define LEDPIN GPIO_NUM_13
+#define LEDPIN GPIO_NUM_2
 
 /** Structs **/
 TaskHandle_t myThreadIndicator1 = NULL;
@@ -44,8 +44,8 @@ int endTime;
 int previousPinState = -1;
 
 /** WIFI Manager **/
-const char *ssid = "Solaria19092.4";
-const char *pass = "";
+const char *ssid = "kediamantunasbudi@unifi";
+const char *pass = "ktb123456";
 
 /** Functions **/
 void thread_indicator1(void *pvParameters);
@@ -60,7 +60,8 @@ void setup()
 {
     Serial.begin(115200);
     delay(100);
-    WiFi.begin(ssid);
+    WiFi.mode(WIFI_STA);
+    WiFi.begin(ssid, pass);
     Serial.println("\n\x1b[31m[WIFI_MANAGER] : Connecting\x1b[0m");
 
     while (WiFi.status() != WL_CONNECTED)
