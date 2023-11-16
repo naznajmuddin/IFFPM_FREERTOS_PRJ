@@ -23,8 +23,8 @@
 |17|UART2||Rx||
 |18|GPIO||OUTPUT|Grinder DIR|
 |19|GPIO||OUTPUT|Grinder PWM|
-|21|GPIO||||
-|22|GPIO||||
+|21|GPIO||INPUT|START Button|
+|22|GPIO||INPUT|RESET Button|
 |23|GPIO||OUTPUT|Crusher DIR|
 |25|GPIO||OUTPUT|Crusher PWM|
 |26|GPIO||INPUT|Weight Sensor|
