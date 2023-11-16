@@ -19,8 +19,8 @@
 |13|GPIO||OUTPUT|LED indicator|
 |14|||||
 |15|||||
-|16|UART2||Tx|STM3 communication|
-|17|UART2||Rx|STM32 communication|
+|16|UART2||Tx||
+|17|UART2||Rx||
 |18|GPIO||OUTPUT|Grinder DIR|
 |19|GPIO||OUTPUT|Grinder PWM|
 |21|GPIO||||
@@ -30,7 +30,7 @@
 |26|GPIO||INPUT|Weight Sensor|
 |27|GPIO||INPUT|Photoelectric Sensor|
 |32|GPIO||OUTPUT|Blower Relay|
-|33|GPIO||||
+|33|GPIO||INPUT|Moisture Sensor|
 |34|GPIO||||
 |35|GPIO||||
 |36|GPIO||||
