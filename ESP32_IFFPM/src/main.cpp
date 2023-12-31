@@ -29,7 +29,9 @@
 AsyncWebServer server(80);
 
 #define BLINK_GPIO GPIO_NUM_2
-#define LEDPIN GPIO_NUM_2
+#define LEDPIN GPIO_NUM_13
+#define BLOWER GPIO_NUM_18
+#define EXTRUDER GPIO_NUM_19
 
 /** Structs **/
 TaskHandle_t myThreadIndicator1 = NULL;
@@ -44,8 +46,8 @@ int endTime;
 int previousPinState = -1;
 
 /** WIFI Manager **/
-const char *ssid = "nazwa";
-const char *pass = "nazwa3499";
+const char *ssid = "KTB 1 padu";
+const char *pass = "ktb@1sahaja";
 
 /** Functions **/
 void thread_indicator1(void *pvParameters);
@@ -89,6 +91,8 @@ void setup()
     }
 
     pinMode(LEDPIN, OUTPUT);
+    pinMode(BLOWER, OUTPUT);
+    pinMode(EXTRUDER, OUTPUT);
     // Blynk.virtualWrite(V0, LOW);
     // Blynk.syncVirtual(V0);
 
@@ -185,6 +189,9 @@ void LEDControlTask(void *pvParameters)
     grinder.init_data(25, 26, 0);
     crusher.init_data(22, 23, 1);
 
+    bool extruderOn = false;
+    bool blowerOn = false;
+
     for (;;)
     {
         timeClient.update();
@@ -202,19 +209,27 @@ void LEDControlTask(void *pvParameters)
 
         if (startTime <= serverTime && serverTime <= endTime)
         {
-            digitalWrite(LEDPIN, 1); // Turn on LED
+            digitalWrite(LEDPIN, 1);   // Turn on LED
+            digitalWrite(EXTRUDER, 1); // Turn on EXTRUDER
+            delay(1000);
+            digitalWrite(EXTRUDER, 0);
+            digitalWrite(BLOWER, 1);
+            delay(1000);
+            digitalWrite(BLOWER, 0); // Turn on BLOWER
             // Serial.println("[FEEDER_MANAGER] : Motor STARTED!");
-            grinder.set_direction(LOW);
-            grinder.set_spin(SPEED_MAX);
-            crusher.set_direction(LOW);
-            crusher.set_spin(SPEED_MAX);
+            // grinder.set_direction(LOW);
+            // grinder.set_spin(SPEED_MAX);
+            // crusher.set_direction(LOW);
+            // crusher.set_spin(SPEED_MAX);
         }
         else if (startTime != serverTime && serverTime != endTime)
         {
-            digitalWrite(LEDPIN, 0); // Turn off LED
+            digitalWrite(LEDPIN, 0);   // Turn off LED
+            digitalWrite(BLOWER, 0);   // Turn off BLOWER
+            digitalWrite(EXTRUDER, 0); // Turn off EXTRUDER
             // Serial.println("[FEEDER_MANAGER] : Motor STOPPED!");
-            grinder.set_spin(SPEED_MIN);
-            crusher.set_spin(SPEED_MIN);
+            // grinder.set_spin(SPEED_MIN);
+            // crusher.set_spin(SPEED_MIN);
         }
 
         if (pinState != previousPinState)
