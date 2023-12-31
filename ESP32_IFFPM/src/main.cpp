@@ -29,9 +29,13 @@
 AsyncWebServer server(80);
 
 #define BLINK_GPIO GPIO_NUM_2
+<<<<<<< HEAD
 #define LEDPIN GPIO_NUM_13
 #define BLOWER GPIO_NUM_18
 #define EXTRUDER GPIO_NUM_19
+=======
+#define LEDPIN GPIO_NUM_2
+>>>>>>> development
 
 /** Structs **/
 TaskHandle_t myThreadIndicator1 = NULL;
@@ -46,8 +50,13 @@ int endTime;
 int previousPinState = -1;
 
 /** WIFI Manager **/
+<<<<<<< HEAD
 const char *ssid = "KTB 1 padu";
 const char *pass = "ktb@1sahaja";
+=======
+const char *ssid = "kediamantunasbudi@unifi";
+const char *pass = "ktb123456";
+>>>>>>> development
 
 /** Functions **/
 void thread_indicator1(void *pvParameters);
@@ -217,19 +226,17 @@ void LEDControlTask(void *pvParameters)
             delay(1000);
             digitalWrite(BLOWER, 0); // Turn on BLOWER
             // Serial.println("[FEEDER_MANAGER] : Motor STARTED!");
-            // grinder.set_direction(LOW);
-            // grinder.set_spin(SPEED_MAX);
-            // crusher.set_direction(LOW);
-            // crusher.set_spin(SPEED_MAX);
+            grinder.set_direction(LOW);
+            grinder.set_spin(SPEED_MAX);
+            crusher.set_direction(LOW);
+            crusher.set_spin(SPEED_MAX);
         }
         else if (startTime != serverTime && serverTime != endTime)
         {
-            digitalWrite(LEDPIN, 0);   // Turn off LED
-            digitalWrite(BLOWER, 0);   // Turn off BLOWER
-            digitalWrite(EXTRUDER, 0); // Turn off EXTRUDER
+            digitalWrite(LEDPIN, 0); // Turn off LED
             // Serial.println("[FEEDER_MANAGER] : Motor STOPPED!");
-            // grinder.set_spin(SPEED_MIN);
-            // crusher.set_spin(SPEED_MIN);
+            grinder.set_spin(SPEED_MIN);
+            crusher.set_spin(SPEED_MIN);
         }
 
         if (pinState != previousPinState)
