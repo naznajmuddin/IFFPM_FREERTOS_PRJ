@@ -29,13 +29,9 @@
 AsyncWebServer server(80);
 
 #define BLINK_GPIO GPIO_NUM_2
-<<<<<<< HEAD
 #define LEDPIN GPIO_NUM_13
 #define BLOWER GPIO_NUM_18
 #define EXTRUDER GPIO_NUM_19
-=======
-#define LEDPIN GPIO_NUM_2
->>>>>>> development
 
 /** Structs **/
 TaskHandle_t myThreadIndicator1 = NULL;
@@ -50,13 +46,8 @@ int endTime;
 int previousPinState = -1;
 
 /** WIFI Manager **/
-<<<<<<< HEAD
 const char *ssid = "KTB 1 padu";
 const char *pass = "ktb@1sahaja";
-=======
-const char *ssid = "kediamantunasbudi@unifi";
-const char *pass = "ktb123456";
->>>>>>> development
 
 /** Functions **/
 void thread_indicator1(void *pvParameters);
@@ -198,8 +189,8 @@ void LEDControlTask(void *pvParameters)
     grinder.init_data(25, 26, 0);
     crusher.init_data(22, 23, 1);
 
-    bool extruderOn = false;
-    bool blowerOn = false;
+    //bool extruderOn = false;
+    //bool blowerOn = false;
 
     for (;;)
     {

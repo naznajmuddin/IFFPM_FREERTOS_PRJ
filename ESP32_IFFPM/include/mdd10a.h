@@ -46,11 +46,7 @@ public:
         int delay_period = 5;
         pwm_val = pwm;
         float new_pwm = speed_control();
-<<<<<<< HEAD
         // Serial.println(new_pwm);
-=======
-        Serial.println(new_pwm);
->>>>>>> development
         digitalWrite(digital_pin, direction);
         ledcWrite(channel_num, new_pwm);
         while (millis() < time_now + delay_period)
@@ -69,10 +65,6 @@ public:
         direction = dir;
         digitalWrite(digital_pin, direction);
         ledcWrite(channel_num, speed);
-<<<<<<< HEAD
         // Serial.println(speed);
-=======
-        Serial.println(speed);
->>>>>>> development
     }
 };
