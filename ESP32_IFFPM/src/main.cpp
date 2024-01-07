@@ -43,6 +43,7 @@ NTPClient timeClient(ntpUDP, "asia.pool.ntp.org", utcOffsetInSeconds);
 
 int startTime;
 int endTime;
+int serverTime;
 int previousPinState = -1;
 
 /** WIFI Manager **/
@@ -207,16 +208,23 @@ void LEDControlTask(void *pvParameters)
         char endTimeStr[10];
         sprintf(endTimeStr, "%02d:%02d %s", (endTime / 3600) % 12, (endTime / 60) % 60, (endTime >= 43200) ? "PM" : "AM");
 
+        //char serverTimeStr[10];
+        //sprintf(serverTimeStr, "%02d:%02d %s", (serverTime / 3600) % 12, (serverTime / 60) % 60, (serverTime >= 43200) ? "PM" : "AM");
+
         if (startTime <= serverTime && serverTime <= endTime)
         {
             digitalWrite(LEDPIN, 1);   // Turn on LED
             digitalWrite(EXTRUDER, 0); // Turn on EXTRUDER
             delay(5000);
             digitalWrite(EXTRUDER, 1);
+            Serial.print("[FEEDER_MANAGER] : EXTRUDER MOVING! : ");
+            Serial.println(startTimeStr);
             delay(500);
             digitalWrite(BLOWER, 0);
-            delay(1000);
+            delay(3000);
             digitalWrite(BLOWER, 1);
+            Serial.print("[FEEDER_MANAGER] : BLOWER MOVING! : ");
+            Serial.println(startTimeStr);
             delay(500);
             // Serial.println("[FEEDER_MANAGER] : Motor STARTED!");
             // grinder.set_direction(LOW);
