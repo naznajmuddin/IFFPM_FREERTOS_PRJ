@@ -215,13 +215,14 @@ void LEDControlTask(void *pvParameters)
         {
             digitalWrite(LEDPIN, 1);   // Turn on LED
             digitalWrite(EXTRUDER, 0); // Turn on EXTRUDER
-            delay(5000);
+            delay(10000);
+            //delay(30000); testing purposes
             digitalWrite(EXTRUDER, 1);
             Serial.print("[FEEDER_MANAGER] : EXTRUDER MOVING! : ");
             Serial.println(startTimeStr);
             delay(500);
             digitalWrite(BLOWER, 0);
-            delay(3000);
+            delay(5000);
             digitalWrite(BLOWER, 1);
             Serial.print("[FEEDER_MANAGER] : BLOWER MOVING! : ");
             Serial.println(startTimeStr);
